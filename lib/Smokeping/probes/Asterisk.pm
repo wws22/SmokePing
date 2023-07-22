@@ -111,7 +111,6 @@ Require the given text to appear somewhere in the response, otherwise
 probe is treated as a failure
 DOC
 			_default => '',
-			return ($self->{properties_example => ', 0% packet loss,',
         },
 		filter => {
 			_doc => <<'DOC',
