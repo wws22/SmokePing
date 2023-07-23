@@ -26,18 +26,18 @@ sub pod_hash {
 	overview => "Fetches something using external command ex: /usr/bin/ping",
 	description => "(There is an universal probe for SmokePing. See man(1) for details of the options below)",
 	authors => <<'DOC',
- Victor Selyukov <victor.selukov at gmail.com>
- Gerald Combs <gerald [AT] ethereal.com>
- Niko Tyni <ntyni@iki.fi>
+    Victor Selyukov <victor.selukov at gmail.com>
+    Gerald Combs <gerald [AT] ethereal.com>
+    Niko Tyni <ntyni@iki.fi>
 DOC
 	notes => <<'DOC',
-You should consider setting a lower value for the C<pings> variable than the
-default 20, as repetitive result fetching may be quite heavy on the server.
+    You should consider setting a lower value for the C<pings> variable than the
+    default 20, as repetitive result fetching may be quite heavy on the server.
 
-The destination to be tested used to be specified by the variable 'destination',
-and the 'host' setting did not influence it in any way.
-The variable name has now been named 'destination', and it can
-(and in most cases should) contain a placeholder for the 'host' variable.
+    The destination to be tested used to be specified by the variable 'destination',
+    and the 'host' setting did not influence it in any way.
+    The variable name has now been named 'destination', and it can
+    (and in most cases should) contain a placeholder for the 'host' variable.
 DOC
     }
 }
@@ -66,37 +66,37 @@ sub targetvars {
 		_mandatory => [ ], # [ 'args' ]
 		destination => {
 			_doc => <<'DOC',
-The template of the destination to fetch.  Can be any one that your binary
-supports. Any occurrence of the string '%host%' will be replaced with the
-host to be probed. Using curl you should use 'https://%host%/' or something
-like that.
+    The template of the destination to fetch.  Can be any one that your binary
+    supports. Any occurrence of the string '%host%' will be replaced with the
+    host to be probed. Using curl you should use 'https://%host%/' or something
+    like that.
 DOC
 			_default => '%host%',
 			_example => '%host%',
 		},
 		args => {
 			_doc => <<'DOC',
-Any arguments you might want to hand to your binary. The arguments
-should be separated by the regexp specified in "extrare", which
-contains just the space character (" ") by default.
+    Any arguments you might want to hand to your binary. The arguments
+    should be separated by the regexp specified in "extrare", which
+    contains just the space character (" ") by default.
 
-Note that program will be called with the resulting list of arguments
-without any shell expansion. If you need to specify any arguments
-containing spaces, you should set "extrare" to something else.
+    Note that program will be called with the resulting list of arguments
+    without any shell expansion. If you need to specify any arguments
+    containing spaces, you should set "extrare" to something else.
 
-As a complicated example, to explicitly set the "Host:" header in Curl
-requests, you need to set "extrare" to something else, eg. "/;/",
-and then specify C<args = --header;Host: www.example.com>.
+    As a complicated example, to explicitly set the "Host:" header in Curl
+    requests, you need to set "extrare" to something else, eg. "/;/",
+    and then specify C<args = --header;Host: www.example.com>.
 DOC
 			_default => '-i 1 -c 1',
 			_example => '-i 1 -c 1',
 		},
 		extrare=> {
 			_doc => <<'DOC',
-The regexp used to split the args string into an argument list,
-in the "/regexp/" notation.  This contains just the space character
-(" ") by default, but if you need to specify any arguments containing spaces,
-you can set this variable to a different value.
+    The regexp used to split the args string into an argument list,
+    in the "/regexp/" notation.  This contains just the space character
+    (" ") by default, but if you need to specify any arguments containing spaces,
+    you can set this variable to a different value.
 DOC
 			_default => "/ /",
 			_example => "/ /",
@@ -109,24 +109,31 @@ DOC
 		},
 		expect => {
             _doc => <<'DOC',
-Require the given text to appear somewhere in the response, otherwise
-probe is treated as a failure
+    Require the given text to appear somewhere in the response, otherwise
+    probe is treated as a failure
 DOC
 			_default => '',
         },
 		filter => {
 			_doc => <<'DOC',
-Perl 's/regexp/replace/ms[ie]' expression used to get the result from STDOUT
-As an example: s/.*time=(.*)\s+ms.*/int($1)/mse for a given line:
-   64 bytes from 192.168.0.1: icmp_seq=1 ttl=63 time=6.52 ms
-means:
-	1. Find 'time=6.52 ms' and keep '6.52'
-	2. Execute perl code 'int(6.52)' to get '6'
+    Perl 's/regexp/replace/ms[ie]' expression used to get the result from STDOUT
+    As an example: s/.*time=(.*)\s+ms.*/int($1)/mse for a given line:
+        64 bytes from 192.168.0.1: icmp_seq=1 ttl=63 time=6.52 ms
+    means:
+	    1. Find 'time=6.52 ms' and keep '6.52'
+	    2. Execute perl code 'int(6.52)' to get '6'
 
-NB!!! Please be careful using 'e' at the end of the expression!
-      's/.../qx{echo $1}/msxe' will execute
-      the command 'echo $1' as a privileged user !!!
-	  Use 's///msx' for most cases to prevent the leaks.
+    You can use %host% patern in the regexp part.
+    Ex:
+        host = some.host
+        filter = s/.*%host%.*\s+OK\s+\((\d+).*/$1/ms
+    the result:
+        filter = s/some\.host/replace/ms
+
+    NB!!! Please be careful using 'e' at the end of the expression!
+          's/.../qx{echo $1}/msxe' will execute
+          the command 'echo $1' as a privileged user !!!
+          Use 's///msx' for most cases to prevent the leaks.
 DOC
 			_default => 's/.*time=(.*)\s+ms.*/$1/ms',
 			_example => 's/.*time=(.*)\s+ms.*/int($1)/mse',
@@ -201,6 +208,9 @@ sub make_commandline {
 	my $dests = $target->{vars}{destination};
 	my $host = $target->{addr};
 	$dests =~ s/%host%/$host/g;
+	my $quoted_host = $host;
+	$quoted_host =~ s/\./\\./gms;
+	$target->{vars}{filter} =~ s/%host%/$quoted_host/ms;
 	my @dsts = split(/\s+/, $dests);
 	push @args, $self->p_args($target);
 
