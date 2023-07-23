@@ -63,7 +63,7 @@ sub probevars {
 sub targetvars {
 	my $class = shift;
 	return $class->_makevars($class->SUPER::targetvars, {
-		_mandatory => [ 'destination', 'args' ],
+		_mandatory => [ 'args' ],
 		destination => {
 			_doc => <<'DOC',
 The template of the destination to fetch.  Can be any one that your binary
@@ -71,6 +71,7 @@ supports. Any occurrence of the string '%host%' will be replaced with the
 host to be probed. Using curl you should use 'https://%host%/' or something
 like that.
 DOC
+			_default => '%host%',
 			_example => '%host%',
 		},
 		args => {
@@ -114,8 +115,8 @@ DOC
         },
 		filter => {
 			_doc => <<'DOC',
-Perl 's/regexp/replace/msx[ie]' expression used to get the result from STDOUT
-As an example: s/.*time=(.*)\s+ms.*/int($1)/msxe for a given line:
+Perl 's/regexp/replace/ms[ie]' expression used to get the result from STDOUT
+As an example: s/.*time=(.*)\s+ms.*/int($1)/mse for a given line:
    64 bytes from 192.168.0.1: icmp_seq=1 ttl=63 time=6.52 ms
 means:
 	1. Find 'time=6.52 ms' and keep '6.52'
@@ -126,12 +127,12 @@ NB!!! Please be careful using 'e' at the end of the expression!
       the command 'echo $1' as a privileged user !!!
 	  Use 's///msx' for most cases to prevent the leaks.
 DOC
-			_default => 's/.*time=(.*)\s+ms.*/$1/msx',
-			_example => 's/.*time=(.*)\s+ms.*/int($1)/msxe',
+			_default => 's/.*time=(.*)\s+ms.*/$1/ms',
+			_example => 's/.*time=(.*)\s+ms.*/int($1)/mse',
 			_sub => sub {
 				my $val = shift;
-				return q{filter should be specified in the 's/.*regexp.*/$1/msx' notation}
-					unless $val =~ m,^s/.*/.*/msx[ie]*$,;
+				return q{filter should be specified in the 's/.*regexp.*/$1/ms' notation}
+					unless $val =~ m,^s/.*/.*/ms[ie]*$,;
 				return undef;
 			},
 		},
