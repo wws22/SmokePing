@@ -24,9 +24,9 @@ sub pod_hash {
     return {
 	name => "Smokeping::probes::Asterisk - an universal probe for SmokePing",
 	overview => "Fetches something using external command ex: /usr/bin/ping",
-	description => "(see man(1) for details of the options below)",
+	description => "(There is an universal probe for SmokePing. See man(1) for details of the options below)",
 	authors => <<'DOC',
- Victor Selyukov <vicror.selukov at gmail.com>
+ Victor Selyukov <victor.selukov at gmail.com>
  Gerald Combs <gerald [AT] ethereal.com>
  Niko Tyni <ntyni@iki.fi>
 DOC
@@ -63,7 +63,7 @@ sub probevars {
 sub targetvars {
 	my $class = shift;
 	return $class->_makevars($class->SUPER::targetvars, {
-		_mandatory => [ 'args' ],
+		_mandatory => [ ], # [ 'args' ]
 		destination => {
 			_doc => <<'DOC',
 The template of the destination to fetch.  Can be any one that your binary
@@ -88,6 +88,7 @@ As a complicated example, to explicitly set the "Host:" header in Curl
 requests, you need to set "extrare" to something else, eg. "/;/",
 and then specify C<args = --header;Host: www.example.com>.
 DOC
+			_default => '-i 1 -c 1',
 			_example => '-i 1 -c 1',
 		},
 		extrare=> {
