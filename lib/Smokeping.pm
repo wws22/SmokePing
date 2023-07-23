@@ -22,6 +22,7 @@ use Smokeping::RRDhelpers;
 use Smokeping::Graphs;
 use URI::Escape;
 use Time::HiRes;
+use Data::Dumper; #WWS
 
 setlogsock('unix')
    if grep /^ $^O $/xo, ("linux", "openbsd", "freebsd", "netbsd");
@@ -839,7 +840,7 @@ sub get_overview ($$$$){
 	    $phys_open = [ @{$tree->{$prop}{__real_path}} ];
 	    pop @$phys_open;
 	}
-
+    #do_filelog(Dumper($tree->{$prop})); do_filelog(Dumper($phys_open)); #WWS
 	next unless $phys_tree->{host};
 	next if $phys_tree->{hide} and $phys_tree->{hide} eq 'yes';
 
@@ -4026,6 +4027,7 @@ sub cgi ($$) {
     umask 022;
     load_cfg $cfgfile;
     initialize_cgilog();
+    initialize_filelog('/var/log/smoke_cgi.log'); # WWS
     if ($q->param(-name=>'slave')) { # a slave is calling in
         Smokeping::Master::answer_slave($cfg,$q);
     } elsif ($q->param(-name=>'secret') && $q->param(-name=>'target') ) {
